@@ -1,141 +1,167 @@
-# smart-drawio
+---
+name: VibeScholar-PaperFig
+description: "Generate publication-quality academic paper figures (architecture diagrams, thesis roadmaps, module flowcharts, data pipeline charts) as draw.io XML using a deterministic grid-based layout engine with AI visual review. Use this skill whenever the user asks to draw, create, or generate any diagram for a paper or thesis — including architecture overviews, method flowcharts, research roadmaps, chapter structure figures, or module detail diagrams. Also trigger when the user mentions drawio, paper figure, 架构图, 路线图, 论文图, 模块图, 流程图, or wants to visualize paper/thesis structure. This skill handles the full pipeline: ASCII wireframe preview → grid layout → draw.io XML generation → PNG export → AI visual scoring → iterative refinement → final delivery for user touch-up in draw.io GUI."
+---
 
-> AI 驱动的论文架构图自动生成。网格布局 → ASCII 确认 → 确定性渲染 → 视觉审查 → 用户微调连线。
+# VibeScholar-PaperFig
 
-## 触发条件
+Academic paper figure generation toolkit. Converts structured layout descriptions into publication-ready draw.io diagrams through a deterministic grid engine and AI-driven visual quality iteration.
 
-用户要求生成论文架构图、流程图、模块图、数据流图时触发。
-关键词：drawio、架构图、AI画图、smart-drawio、画一个图。
+GitHub: https://github.com/wscffaa/VibeScholar-PaperFig
 
-## 前置条件
+## How It Works
 
-- **生成前必须读取 `knowledge.md`**，避免重复踩坑
-- 网格引擎模式（默认）：无需任何后台服务
-- AI 辅助模式（备用）：需 `~/VibeScholar/smart-drawio/serve.sh start`
+The core insight: LLMs are bad at pixel coordinates but good at describing structure. So we separate concerns:
 
-## 流程纪律（MUST）
+1. **You** define the logical structure (what modules exist, how they connect, their types)
+2. **Grid engine** deterministically converts grid positions to pixel coordinates (zero overlap by construction)
+3. **AI visual review** scores the rendered output and provides actionable feedback
+4. **You** do final touch-up on connection line routing in draw.io GUI (30 seconds of dragging)
 
-1. **不自动打开文件**：迭代过程中禁止调用 `open`，只在最终审查通过且用户确认后打开一次
-2. **不启动不必要的服务**：网格引擎方案不需要 smart-drawio 网页服务
-3. **单文件原则**：同一张图只维护一个 .drawio 文件，迭代覆盖而非创建多个版本
-4. **审查驱动迭代**：每次修改后必须跑视觉审查，根据反馈调整，不盲目重试
-
-## 工具链
+## Workflow
 
 ```
-.claude/skills/smart-drawio/
-├── skill.md          ← 本文件
-├── knowledge.md      ← 经验知识库（禁忌+已知问题+解决方案）
-├── grid_engine.py    ← 网格布局引擎（核心，确定性生成）
-├── generate.py       ← AI 辅助 API 客户端（备用）
-├── composer.py       ← 分层组合器（备用）
-├── audit.py          ← 结构审查
-├── pipeline.py       ← 自动迭代管道
-└── plans/            ← 预定义的 layout.json
-├── composer.py       ← 分层组合器（多模块合并）
-├── audit.py          ← 结构审查（XML 完整性）
-├── pipeline.py       ← 自动迭代管道（生成→审查→迭代→定稿）
-└── plans/            ← 预定义的 plan.json 模板
+Step 1: Read knowledge.md (mandatory — contains hard-won lessons)
+Step 2: Collect module info from code/ledger/craft files
+Step 3: Build layout.json (grid coordinates, element types, connections)
+Step 4: Show ASCII preview to user for layout confirmation
+Step 5: Run grid_engine.py → output.drawio
+Step 6: Export PNG via draw.io CLI
+Step 7: Run visual_review.py → score + feedback
+Step 8: If score < 7: adjust layout.json based on feedback, goto Step 5
+Step 9: If score ≥ 7: open draw.io for user to adjust connection lines
+```
+
+Important behavioral rules:
+- Never call `open` during iteration — only after final pass
+- Single file per figure — overwrite, don't create versions
+- Always run visual review before declaring success
+- Read knowledge.md before every generation session
+
+## File Layout
+
+```
+.claude/skills/VibeScholar-PaperFig/
+├── skill.md              ← This file
+├── knowledge.md          ← Accumulated rules, gotchas, and solutions
+├── grid_engine.py        ← Core: grid coords → draw.io XML
+├── audit.py              ← Structural XML validation
+└── plans/                ← Reusable layout.json templates
 
 _workspace/03-scripts/
-└── visual_review.py  ← 视觉质量审查（AI 视觉模型评分）
+└── visual_review.py      ← AI vision model scoring (needs OpenAI-compatible API)
 ```
 
-## 工作流程（五阶段门禁）
+## layout.json Schema
 
-### Phase 1: 需求分析与复杂度判定
-
-| 复杂度 | 模块数 | 嵌套 | 策略 | 工具 |
-|--------|--------|------|------|------|
-| 简单 | ≤5 | 0 | 单次生成 | generate.py |
-| 中等 | 6-12 | 1 | 坐标约束单次 | generate.py + 显式坐标 |
-| 复杂 | >12 | ≥2 | 分层组合 | composer.py + plan.json |
-
-### Phase 2: Plan 构造
-
-**简单模式**：直接写 prompt 文本
-**分层模式**：构造 plan.json
 ```json
 {
-  "title": "模块名",
-  "canvas": [宽, 高],
-  "modules": [
-    {"name": "子模块名", "prompt": "子模块描述", "width": W, "height": H, "x": X, "y": Y}
+  "title": "Figure Title",
+  "grid": {"cols": 3, "rows": 9},
+  "elements": [
+    {
+      "id": "unique_id",
+      "label": "Display Text",
+      "type": "input|output|processing|innovation|baseline|loss",
+      "row": 0,
+      "col": 1,
+      "rowspan": 1,
+      "colspan": 2,
+      "detail": "Optional subtitle text"
+    }
   ],
   "connections": [
-    {"source_module": "A", "source_label": "节点文本",
-     "target_module": "B", "target_label": "节点文本", "label": "连线标签"}
+    {
+      "source": "element_id",
+      "target": "element_id",
+      "label": "optional edge label",
+      "type": "solid|dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "group_id",
+      "label": "Group Label",
+      "row": 0, "col": 0, "rowspan": 9, "colspan": 3,
+      "dashed": true
+    }
   ]
 }
 ```
 
-关键原则：
-- 每个子模块 prompt 描述 ≤5 个元素（AI 画得好）
-- 显式指定每个子模块的位置和尺寸
-- 连接通过节点文本模糊匹配
+Element types map to academic color coding:
+| Type | Color | Shape | Use For |
+|------|-------|-------|---------|
+| input | Steel blue #d4e1f5 | Parallelogram | Input data/frames |
+| output | Light green #d5e8d4 | Parallelogram | Output/reconstructed |
+| processing | Blue #dae8fc | Rounded rect | Standard modules |
+| innovation | Orange #fff2cc | Rounded rect | Novel contributions (highlight) |
+| baseline | Gray #f5f5f5 | Rounded rect | Existing/borrowed components |
+| loss | Red #f8cecc | Rounded rect | Training-only components |
 
-### Phase 3: 自动迭代管道
+## Commands
 
 ```bash
-python3 .claude/skills/smart-drawio/pipeline.py \
-  <plan.json 或 prompt.txt> \
-  -o <输出目录> \
-  --max-iter 3 \
-  --threshold 7
+# ASCII preview (zero cost, confirm layout before generation)
+python3 .claude/skills/VibeScholar-PaperFig/grid_engine.py layout.json --ascii
+
+# Generate draw.io XML
+python3 .claude/skills/VibeScholar-PaperFig/grid_engine.py layout.json -o output.drawio
+
+# Export PNG (requires draw.io desktop)
+/Applications/draw.io.app/Contents/MacOS/draw.io --export --format png --scale 1.5 --output preview.png output.drawio
+
+# Visual review (requires OpenAI-compatible vision API)
+python3 _workspace/03-scripts/visual_review.py preview.png --json
+
+# Structural audit
+python3 .claude/skills/VibeScholar-PaperFig/audit.py output.drawio
 ```
 
-管道内部流程：
-```
-生成 drawio → 结构审查(audit.py) → 渲染 PNG → 视觉审查(visual_review.py)
-                    ↓ FAIL                              ↓ FAIL
-              调整 prompt 重试                    根据反馈优化 prompt 重试
-                                                        ↓ PASS (score≥7)
-                                              输出 final.drawio + PDF + SVG
-```
+## When Visual Review Fails
 
-### Phase 4: 人工确认（门禁，不可跳过）
+The visual review returns specific issues. Map them to layout.json adjustments:
 
-管道通过后，向用户展示：
-1. 预览 PNG 图片
-2. 视觉审查评分和维度分数
-3. 残留问题（如有）
+| Feedback | Fix |
+|----------|-----|
+| "modules overlap" | Impossible with grid engine — check if groups overlap elements |
+| "text too small" | Shorten label text, grid engine uses fixed 12px |
+| "connections crossing" | Rearrange grid positions to minimize crossings |
+| "too crowded" | Increase grid dimensions, add empty rows/cols as spacing |
+| "color too many" | Reduce element type variety, use fewer categories |
+| "residual line interferes" | Use elbowEdgeStyle with exitX=1/entryX=1 for right-side bypass |
 
-**必须用户确认后才能移入编译层。**
+## Responsibility Split
 
-### Phase 5: 定稿归档
+What this skill handles automatically:
+- Module positioning (grid system, zero overlap guaranteed)
+- Color coding (type → color mapping)
+- Text labels and font sizing
+- Overall layout direction and hierarchy
+- Arrow styles and sizes
+- Spacing uniformity
 
-用户确认后：
-1. 复制 PDF 到编译层 `figures/chap0N/figX.Y-slug/`
-2. 保留 .drawio 源文件在工作区（可后续编辑）
-3. 清理中间产物（draft-iter*.drawio, preview-iter*.png）
-4. 更新 FIGURE_INDEX.yaml
+What the user handles in draw.io GUI (takes ~30 seconds):
+- Connection line waypoint routing (drag to adjust paths)
+- Residual/skip connection precise routing
+- Minor spacing tweaks
+- Edge label positioning
 
-## 视觉审查评分维度
+## Relationship to Other Figure Skills
 
-| 维度 | 权重 | 说明 |
-|------|------|------|
-| 布局清晰度 | 25% | 模块不重叠、间距合理、层次分明 |
-| 文字可读性 | 20% | 字号合适、不被遮挡 |
-| 连接线清晰度 | 20% | 不过度交叉、箭头方向明确 |
-| 学术规范性 | 20% | 配色克制、无装饰、信息密度适当 |
-| 整体美观度 | 15% | 视觉平衡、留白合理 |
+| Figure Type | Tool |
+|-------------|------|
+| Architecture diagrams, roadmaps, flowcharts | **VibeScholar-PaperFig** |
+| Quantitative charts (curves, bars, ablation tables) | ofr-thesis-figure (matplotlib) |
+| Qualitative comparison grids (visual results) | ofr-thesis-figure (matplotlib) |
+| Frequency analysis plots | ofr-thesis-figure (matplotlib) |
 
-通过阈值：≥7 分（可调）
+## Critical: Read knowledge.md First
 
-## 迭代失败处理
+Before generating any figure, read `knowledge.md` in this skill directory. It contains:
+- **Prohibitions** (F-01 to F-05): Things that must never be done (e.g., never delete residual connections)
+- **Fixed rules** (R-01 to R-08): Mandatory style conventions
+- **Known issues**: Problems encountered and their proven solutions
+- **Scoring baselines**: What configurations achieve what scores
 
-| 情况 | 处理 |
-|------|------|
-| 3 次迭代仍 <7 分 | 降级为骨架图 + 提示用户手动编辑 |
-| API 超时/502 | 重启服务后重试 |
-| 视觉审查 API 失败 | 跳过视觉审查，仅做结构审查 + 人工确认 |
-
-## 与 ofr-thesis-figure 的分工
-
-| 场景 | 工具 |
-|------|------|
-| 定量图表（曲线、柱状图、消融表） | ofr-thesis-figure (matplotlib) |
-| 架构图、模块图、数据流图 | smart-drawio |
-| 定性对比图（视觉结果拼接） | ofr-thesis-figure (matplotlib) |
-| 概念图、流程图 | smart-drawio |
-| 频域分析图 | ofr-thesis-figure (matplotlib) |
+Skipping this step leads to repeating solved problems.
