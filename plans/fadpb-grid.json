@@ -1,0 +1,30 @@
+{
+  "title": "FADPB_CAB Module Architecture",
+  "grid": {"cols": 3, "rows": 9},
+  "elements": [
+    {"id": "input", "label": "Input Feature x", "type": "input", "row": 0, "col": 1, "colspan": 1, "detail": "(B, C, H, W)"},
+    {"id": "gap", "label": "GAP + LayerNorm", "type": "processing", "row": 2, "col": 0, "colspan": 1, "detail": "Global Avg Pool"},
+    {"id": "hp", "label": "Multi-scale HP", "type": "innovation", "row": 2, "col": 2, "colspan": 1, "detail": "scales {1,2,4} + Router + Gate"},
+    {"id": "concat", "label": "Concat Descriptors", "type": "processing", "row": 3, "col": 0, "colspan": 3, "detail": "desc (B, 2C)"},
+    {"id": "mlp", "label": "MLP Scoring", "type": "processing", "row": 4, "col": 0, "colspan": 3, "detail": "Linear - ReLU - Linear"},
+    {"id": "experts", "label": "Expert Routing", "type": "innovation", "row": 5, "col": 0, "colspan": 3, "detail": "K=16 prompts, Softmax(t)"},
+    {"id": "dynconv", "label": "Dynamic Conv 3x3", "type": "innovation", "row": 6, "col": 0, "colspan": 3, "detail": "Sum(prob_k * kernel_k)"},
+    {"id": "gelu", "label": "GELU", "type": "baseline", "row": 7, "col": 0, "colspan": 1},
+    {"id": "ca", "label": "Channel Attention", "type": "baseline", "row": 7, "col": 2, "colspan": 1, "detail": "SE-style"},
+    {"id": "output", "label": "Output Feature", "type": "output", "row": 8, "col": 0, "colspan": 3, "detail": "(B, C, H, W)"}
+  ],
+  "connections": [
+    {"source": "input", "target": "gap", "type": "solid"},
+    {"source": "input", "target": "hp", "type": "solid"},
+    {"source": "gap", "target": "concat", "label": "gap_desc"},
+    {"source": "hp", "target": "concat", "label": "gated_hp"},
+    {"source": "concat", "target": "mlp", "type": "solid"},
+    {"source": "mlp", "target": "experts", "type": "solid"},
+    {"source": "experts", "target": "dynconv", "type": "solid"},
+    {"source": "dynconv", "target": "gelu", "type": "solid"},
+    {"source": "gelu", "target": "ca", "type": "solid"},
+    {"source": "ca", "target": "output", "type": "solid"},
+    {"source": "input", "target": "output", "type": "dashed", "label": "Residual"}
+  ],
+  "groups": []
+}
