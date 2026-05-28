@@ -1,0 +1,31 @@
+{
+  "templateId": "architecture-module",
+  "description": "单模块内部结构模板（适合 CAB/Block 级别细节图）",
+  "grid": {"cols": 3, "rows": 7},
+  "defaults": {
+    "direction": "top-to-bottom",
+    "cellWidth": 180,
+    "cellHeight": 80,
+    "gapX": 50,
+    "gapY": 40
+  },
+  "elements": [
+    {"id": "input", "label": "Input Feature", "type": "input", "row": 0, "col": 1, "detail": "B,C,H,W"},
+    {"id": "norm", "label": "LayerNorm", "type": "baseline", "row": 1, "col": 1},
+    {"id": "core_op", "label": "Core Operation", "type": "innovation", "row": 2, "col": 1, "detail": "Novel Component"},
+    {"id": "activation", "label": "GELU", "type": "baseline", "row": 3, "col": 1},
+    {"id": "proj", "label": "Projection", "type": "processing", "row": 4, "col": 1},
+    {"id": "attention", "label": "Channel Attention", "type": "processing", "row": 5, "col": 1, "detail": "SE-style"},
+    {"id": "output", "label": "Output Feature", "type": "output", "row": 6, "col": 1, "detail": "B,C,H,W"}
+  ],
+  "connections": [
+    {"source": "input", "target": "norm", "type": "solid"},
+    {"source": "norm", "target": "core_op", "type": "solid"},
+    {"source": "core_op", "target": "activation", "type": "solid"},
+    {"source": "activation", "target": "proj", "type": "solid"},
+    {"source": "proj", "target": "attention", "type": "solid"},
+    {"source": "attention", "target": "output", "type": "solid"},
+    {"source": "input", "target": "output", "type": "dashed", "label": "Residual"}
+  ],
+  "groups": []
+}

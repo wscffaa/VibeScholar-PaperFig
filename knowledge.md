@@ -1,69 +1,260 @@
-# VibeScholar-PaperFig 经验知识库
+# PaperFig Knowledge Base
 
-> 视觉审查迭代中积累的规则。每次生成前必须读取，避免重复踩坑。
+> Hard-won rules from visual review iterations. Read before every generation session.
 
-## 禁忌（绝对不可违反）
+## Prohibitions (absolute, never violate)
 
-| ID | 禁忌 | 原因 |
-|----|------|------|
-| F-01 | 不得删除 Residual/Skip Connection 连线 | 残差连接是网络结构的核心组成部分，删除等于篡改架构 |
-| F-02 | 不得合并功能不同的模块为一个框 | 每个独立功能模块必须有独立的视觉表示 |
-| F-03 | 不得用装饰性元素替代结构性元素 | 图表必须准确反映实际方法，不是装饰 |
-| F-04 | 不得省略创新模块的标注 | 创新贡献必须在视觉上可识别（橙色/★标记） |
-| F-05 | 不得改变数据流方向以"美化"布局 | 数据流方向必须与实际 forward pass 一致 |
+| ID | Prohibition | Reason |
+|----|-------------|--------|
+| F-01 | Never delete Residual/Skip Connection edges | Residual connections are core structural elements |
+| F-02 | Never merge functionally distinct modules into one box | Each independent module needs its own visual representation |
+| F-03 | Never use decorative elements to replace structural ones | Diagrams must accurately reflect the actual method |
+| F-04 | Never omit innovation module annotations | Novel contributions must be visually identifiable (orange/star) |
+| F-05 | Never change data flow direction to "beautify" layout | Data flow must match actual forward pass direction |
 
-## 固定规则（所有图表必须遵守）
+## Fixed Rules (all figures must obey)
 
-| ID | 规则 | 说明 |
-|----|------|------|
-| R-01 | 输入/输出用平行四边形 | 区分数据节点和处理节点 |
-| R-02 | 创新模块用橙色(#fff2cc) | 视觉突出贡献点 |
-| R-03 | 基线模块用灰色(#f5f5f5) | 区分已有组件 |
-| R-04 | Residual 连线用虚线+右侧绕行 | 学术惯例，不与主干混淆 |
-| R-05 | 主干流向 top→bottom | 中文论文纵向阅读习惯 |
-| R-06 | 连线标签字号 ≥12px | 确保缩放后可读 |
-| R-07 | 模块间距 ≥50px | 避免视觉拥挤 |
-| R-08 | html=0（纯文本标签） | draw.io CLI 导出不渲染 HTML 标签 |
+| ID | Rule | Explanation |
+|----|------|-------------|
+| R-01 | Input/Output use parallelogram shape | Distinguishes data nodes from processing nodes |
+| R-02 | Innovation modules use orange (#fff2cc) | Visually highlights contribution points |
+| R-03 | Baseline modules use gray (#f5f5f5) | Distinguishes existing components |
+| R-04 | Residual edges use dashed + right-side bypass | Academic convention, avoids confusion with main trunk |
+| R-05 | Main flow direction top->bottom | Vertical reading convention for academic papers |
+| R-06 | Edge label font size >= 12px | Ensures readability after scaling |
+| R-07 | Module spacing >= 50px | Avoids visual crowding |
+| R-08 | html=0 (plain text labels) | draw.io CLI export does not render HTML labels |
 
-## 已知问题与解决方案
+## Known Issues and Solutions
 
-| 问题 | 原因 | 解决方案 | 发现版本 |
-|------|------|---------|---------|
-| 导出 PNG 内容为空 | html=1 的 HTML 标签在 CLI 无头模式不渲染 | 改用 html=0 + 单行文本（不用换行） | v3→v5 |
-| swimlane 容器遮挡子元素 | z-order 问题，swimlane 在上层 | 改用普通矩形(fillColor=none)作为容器 | v3→v4 |
-| 视觉审查评 0 分 | 图片实际为空（上述两个问题导致） | 修复 html=0 + 去 swimlane | v3→v5 |
-| Residual 虚线贯穿全图干扰阅读 | 正交路由默认走最短路径 | 用 elbowEdgeStyle + exitX=1/entryX=1 强制右侧绕行 | v6→v8 |
-| 外框虚线与内部连线混淆 | swimlane/group 边框与 edge 视觉相似 | 去掉外框，或用极细线(strokeWidth=1) | v6→v8 |
-| 分支汇合处连线绕行 | 正交路由的固有限制 | 留给用户在 GUI 中手动调整 waypoints | v8（接受） |
-| 连线标签贴线太近 | draw.io 默认 label 位置 | 增大字号+白色背景（但 CLI 渲染有 bug），最终留给用户调 | v9（接受） |
-| 平行四边形 vs 圆角矩形不统一 | 视觉审查建议统一 | 保留平行四边形（I/O 语义区分），审查模型反而给更高分 | v10→v11 |
-| &#xa; 转义字符直接显示 | html=0 模式不解析 XML 实体作为换行 | 不用 &#xa;，改为单行短文本 | roadmap-v2→v3 |
-| 中文引号导致 XML 解析失败 | 中文 "" 在 XML attribute 中被当作引号结束 | 用 esc() 函数转义所有特殊字符 | roadmap-v1 |
-| 字符箭头(=====>)不规范 | 文本模拟箭头缺乏矢量感 | 用独立框+edge连线实现真实箭头 | roadmap-v2→v3 |
-| 多次 open 打开多个 draw.io 窗口 | 迭代过程中每次都调用 open | 只在最终审查通过后 open 一次 | roadmap |
-| smart-drawio 网页服务残留 | 早期 Docker/pnpm dev 部署未清理 | 网格引擎方案不需要网页服务，生成后直接停止 | roadmap |
+| Issue | Cause | Solution | Version |
+|-------|-------|----------|---------|
+| Exported PNG is blank | html=1 HTML labels not rendered in headless CLI | Use html=0 + single-line text (no line breaks) | v3->v5 |
+| swimlane container occludes children | z-order issue, swimlane renders on top | Use plain rect (fillColor=none) as container | v3->v4 |
+| Visual review scores 0 | Image actually blank (above two issues) | Fix html=0 + remove swimlane | v3->v5 |
+| Residual dashed line crosses entire diagram | Orthogonal routing takes shortest path | Use elbowEdgeStyle + exitX=1/entryX=1 for right bypass | v6->v8 |
+| Group border confused with edges | swimlane/group border visually similar to edges | Remove border or use very thin line (strokeWidth=1) | v6->v8 |
+| Branch merge point routing issues | Inherent limitation of orthogonal routing | Leave for user to adjust waypoints in GUI | v8 (accepted) |
+| Edge labels too close to line | draw.io default label position | Increase font + white background (CLI has bugs), leave for user | v9 (accepted) |
+| Parallelogram vs rounded rect inconsistency | Visual review suggested unifying | Keep parallelogram (I/O semantic distinction), review model scores higher | v10->v11 |
+| &#xa; escape chars displayed literally | html=0 mode does not parse XML entities as newlines | Do not use &#xa;, use single-line short text | roadmap-v2->v3 |
+| Chinese quotes break XML parsing | Chinese "" treated as quote terminators in XML attributes | Use _esc() function to escape all special characters | roadmap-v1 |
+| Character arrows (====>) look unprofessional | Text-simulated arrows lack vector quality | Use separate box + edge connection for real arrows | roadmap-v2->v3 |
 
-## 视觉审查评分基线
+## Visual Review Score Baselines
 
-| 配置 | 评分 | 说明 |
-|------|------|------|
-| 网格引擎 + 3列 + 平行四边形I/O + 无外框 + Residual右绕 | 8/10 | 当前最优自动生成配置 |
-| 同上但去掉 Residual | 8/10 | connections +1 但违反 F-01 禁忌 |
-| 同上但加外框 | 7/10 | 外框干扰连线识别 |
-| 同上但统一圆角矩形 | 7/10 | 失去 I/O 语义区分 |
+| Configuration | Score | Notes |
+|---------------|-------|-------|
+| Grid engine + 3col + parallelogram I/O + no border + Residual right-bypass | 8/10 | Current best auto-generated config |
+| Same but without Residual | 8/10 | connections +1 but violates F-01 |
+| Same but with group border | 7/10 | Border interferes with edge identification |
+| Same but unified rounded rect | 7/10 | Loses I/O semantic distinction |
 
-## 用户负责调整的部分（不自动优化）
+## User-Responsible Adjustments (not auto-optimized)
 
-- 连线路径 waypoints（拖拽即可）
-- Residual 虚线的精确走向
-- 局部间距微调
-- 连线标签位置
+- Edge waypoint routing (drag to adjust paths)
+- Residual dashed line precise routing
+- Local spacing fine-tuning
+- Edge label positioning
 
-## 自动优化的部分（skill 负责做到最好）
+## Auto-Optimized (skill handles)
 
-- 模块位置（网格系统，零重叠）
-- 颜色编码（类型→颜色映射）
-- 文字标签内容和字号
-- 整体布局方向和层次
-- 箭头样式和大小
-- 模块间距均匀性
+- Module positioning (grid system, zero overlap)
+- Color coding (type -> color mapping)
+- Text labels and font sizing
+- Overall layout direction and hierarchy
+- Arrow styles and sizes
+- Spacing uniformity
+
+## Post-Processing Pipeline
+
+After XML generation, optional post-processing:
+
+```bash
+python3 ~/.claude/skills/paper-fig/scripts/postprocess.py output.drawio -o output-pp.drawio
+```
+
+Pipeline steps (in order):
+1. **XML repair** -- truncation detection + closing tag completion
+2. **Grid snap** -- all coordinates snap to 10px grid
+3. **Overlap fix** -- push apart along smaller penetration axis (max 5 rounds)
+4. **Consistent spacing** -- same-layer elements evenly distributed
+5. **Anchor optimization** -- angle-based edge exit/entry face selection + fan-out distribution
+6. **Arrow normalization** -- endpoint classicBlock + remove start arrows (optional)
+7. **Label background** -- edge labels get white background (optional)
+
+## Layout Optimizer Parameters
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| GRID | 10px | Coordinate alignment unit |
+| LAYER_GAP | 100px | Vertical gap between layers |
+| NODE_GAP | 40px | Horizontal gap between same-layer nodes |
+| MARGIN | 40px | Canvas margin on all sides |
+| MAX_COLS | 4 | Max columns for disconnected nodes |
+
+## Anchor Optimization Strategy
+
+- Auto-select exit face (top/bottom/left/right) based on source->target angle
+- Face selection threshold: rectangle diagonal angle `atan2(h, w)`
+- Multiple edges on same face use fan-out: `spread = (i+1) / (count+1)`
+- Anchor coords: top=(spread,0), bottom=(spread,1), left=(0,spread), right=(1,spread)
+
+## Drawing Tricks
+
+| Trick | Function | When to Use |
+|-------|----------|-------------|
+| gridSnap | Align coords to 10px | Always (default on) |
+| orthogonalRouting | Orthogonal polyline routing | Academic figures default |
+| consistentSpacing | Same-layer spacing equalization | Elements >= 3 |
+| normalizeArrows | Unify arrow styles | Mixed-source XML |
+| labelBackground | White background for labels | Edge labels overlap nodes |
+| jumpCrossings | Crossing jump arcs | Unavoidable edge crossings |
+| removeWaypoints | Clear manual waypoints | Before re-routing |
+
+## Academic Mode Disabled Effects
+
+Under research theme, these effects MUST be off:
+- shadow
+- gradient
+- glass
+- sketch (hand-drawn)
+- rounded preset (but arcSize=10 slight rounding is kept)
+
+## Academic 5-Color Scheme
+
+| Scheme | Fill | Stroke | Semantic |
+|--------|------|--------|----------|
+| Grayscale (preferred) | #F7F9FC | #2C3E50 | B&W print friendly |
+| Blue | #dae8fc | #3498DB | Processing / standard modules |
+| Green | #d5e8d4 | #82b366 | Success / output / start |
+| Yellow/Orange | #fff2cc | #d6b656 | Innovation / decision / warning |
+| Red | #f8cecc | #E74C3C | Loss / bottleneck / emphasis |
+
+Color-blind friendly: avoid red-green combos, prefer blue-orange. Text-background contrast >= 4.5:1.
+
+## Template Library
+
+`plans/` directory templates (use directly or as starting point):
+
+| Template | Use Case |
+|----------|----------|
+| `architecture-layered.json` | 3-5 layer system architecture (Encoder-Core-Decoder) |
+| `architecture-module.json` | Single module internals (CAB/Block level) |
+| `dataflow-pipeline.json` | Data processing pipeline (left->right) |
+| `flowchart-algorithm.json` | Algorithm flowchart (with decision branches) |
+| `comparison-ablation.json` | Ablation comparison (side-by-side) |
+| `experimental-workflow.json` | Experiment workflow (train->eval->analyze) |
+| `fadpb-grid.json` | FADPB_CAB module (real case) |
+
+## XML Format Constraints (draw.io compatibility)
+
+- All coordinates must be multiples of 10 (gridSize=10)
+- Node style must include `fontFamily=Arial;fontSize=12;`
+- Edge style must include `edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;`
+- Containers use plain rect `fillColor=none` (NOT swimlane, avoids z-order issues)
+- Special characters must be XML-escaped (&, <, >, ", Chinese quotes)
+- Aspect ratio: 4:3 or 16:9
+
+## Backends
+
+### XML Backend (default, zero dependencies)
+
+The default backend generates raw draw.io XML using Python string formatting.
+No external dependencies required. Output is a valid `.drawio` file.
+
+```bash
+python3 ~/.claude/skills/paper-fig/scripts/grid_engine.py layout.json -o output.drawio
+```
+
+### drawpyo Backend (optional)
+
+[drawpyo](https://github.com/MerrimanInd/drawpyo) is a Python library for programmatic
+draw.io file creation. It provides a higher-level API but requires installation.
+
+Install: `pip install drawpyo`
+
+```bash
+python3 ~/.claude/skills/paper-fig/scripts/grid_engine.py layout.json -o output.drawio --backend drawpyo
+```
+
+Advantages of drawpyo:
+- Proper object model (less string manipulation)
+- Built-in style management
+- Easier to extend with custom shapes
+
+Limitations:
+- Extra dependency (not always available in CI/server environments)
+- Less control over exact XML output format
+- May not preserve all custom style attributes from RESEARCH_THEME
+
+Recommendation: Use `xml` backend (default) for production figures. Use `drawpyo` for
+rapid prototyping or when you need programmatic manipulation of the diagram object model.
+
+## Official draw.io XML Reference Rules
+
+Based on the [jgraph/drawio](https://github.com/jgraph/drawio) source and MCP integration:
+
+### Structure
+
+```xml
+<mxfile>
+  <diagram id="..." name="Page-1">
+    <mxGraphModel dx="..." dy="..." grid="1" gridSize="10" ...>
+      <root>
+        <mxCell id="0"/>                    <!-- root cell, always present -->
+        <mxCell id="1" parent="0"/>         <!-- default layer -->
+        <!-- vertices and edges here -->
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+```
+
+### Vertex (Node) Rules
+
+- `vertex="1"` marks a node
+- `parent="1"` places it on the default layer
+- `<mxGeometry x="..." y="..." width="..." height="..." as="geometry"/>` is required
+- Style is a semicolon-separated key=value string
+- `html=0` is MANDATORY for CLI export compatibility
+
+### Edge Rules
+
+- `edge="1"` marks a connection
+- `source="id"` and `target="id"` reference vertex IDs
+- `<mxGeometry relative="1" as="geometry"/>` for edges
+- Waypoints go inside geometry as `<Array as="points"><mxPoint x="..." y="..."/></Array>`
+- Exit/entry points: `exitX`, `exitY`, `entryX`, `entryY` (0-1 normalized)
+
+### Style Key Reference
+
+| Key | Values | Notes |
+|-----|--------|-------|
+| `rounded` | 0/1 | Rounded corners |
+| `fillColor` | hex/#none | Background color |
+| `strokeColor` | hex | Border color |
+| `strokeWidth` | number | Border thickness |
+| `fontFamily` | string | Font name |
+| `fontSize` | number | Font size in px |
+| `fontStyle` | 0/1/2/4 | 0=normal, 1=bold, 2=italic, 4=underline (bitmask) |
+| `align` | left/center/right | Horizontal text alignment |
+| `verticalAlign` | top/middle/bottom | Vertical text alignment |
+| `whiteSpace` | wrap | Enable text wrapping |
+| `html` | 0/1 | 0=plain text, 1=HTML (MUST be 0 for CLI) |
+| `dashed` | 0/1 | Dashed border/edge |
+| `dashPattern` | "N M" | Dash and gap lengths |
+| `edgeStyle` | orthogonalEdgeStyle/elbowEdgeStyle/... | Edge routing algorithm |
+| `endArrow` | block/blockThin/classic/open/none | Arrow head shape |
+| `endSize` | number | Arrow head size |
+| `endFill` | 0/1 | Filled arrow head |
+| `shape` | mxgraph.xxx / parallelogram / ... | Custom shape |
+
+### Gotchas from jgraph/drawio source
+
+1. `id="0"` and `id="1"` are reserved (root + default layer)
+2. Compressed diagrams use deflate+base64 in `<diagram>` text content -- we always use uncompressed
+3. `pageWidth`/`pageHeight` in mxGraphModel define the visible canvas
+4. `dx`/`dy` in mxGraphModel are scroll offsets, not canvas size (but we use them as canvas hints)
+5. Styles are inherited: child cells inherit parent styles unless overridden
+6. `swimlane` shape has special z-order behavior -- avoid for containers (use plain rect)

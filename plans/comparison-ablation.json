@@ -1,0 +1,34 @@
+{
+  "templateId": "comparison-ablation",
+  "description": "消融对比模板（左右并列，适合方法变体对比）",
+  "grid": {"cols": 5, "rows": 7},
+  "defaults": {
+    "direction": "top-to-bottom",
+    "cellWidth": 160,
+    "cellHeight": 80,
+    "gapX": 60,
+    "gapY": 40
+  },
+  "elements": [
+    {"id": "input_a", "label": "Input", "type": "input", "row": 0, "col": 1},
+    {"id": "input_b", "label": "Input", "type": "input", "row": 0, "col": 3},
+    {"id": "base_a", "label": "Baseline Module", "type": "baseline", "row": 2, "col": 1},
+    {"id": "ours_b", "label": "Ours (w/ Module)", "type": "innovation", "row": 2, "col": 3},
+    {"id": "proc_a", "label": "Reconstruct", "type": "processing", "row": 4, "col": 1},
+    {"id": "proc_b", "label": "Reconstruct", "type": "processing", "row": 4, "col": 3},
+    {"id": "out_a", "label": "Output (Baseline)", "type": "output", "row": 6, "col": 1},
+    {"id": "out_b", "label": "Output (Ours)", "type": "output", "row": 6, "col": 3}
+  ],
+  "connections": [
+    {"source": "input_a", "target": "base_a", "type": "solid"},
+    {"source": "base_a", "target": "proc_a", "type": "solid"},
+    {"source": "proc_a", "target": "out_a", "type": "solid"},
+    {"source": "input_b", "target": "ours_b", "type": "solid"},
+    {"source": "ours_b", "target": "proc_b", "type": "solid"},
+    {"source": "proc_b", "target": "out_b", "type": "solid"}
+  ],
+  "groups": [
+    {"id": "g_baseline", "label": "Baseline", "row": 0, "col": 0, "rowspan": 7, "colspan": 2, "dashed": true},
+    {"id": "g_ours", "label": "Ours", "row": 0, "col": 3, "rowspan": 7, "colspan": 2, "dashed": true}
+  ]
+}

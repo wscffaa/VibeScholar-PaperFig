@@ -1,0 +1,27 @@
+{
+  "templateId": "architecture-layered",
+  "description": "分层架构图模板（3-5层，自上而下）",
+  "grid": {"cols": 5, "rows": 9},
+  "defaults": {
+    "direction": "top-to-bottom",
+    "cellWidth": 180,
+    "cellHeight": 90,
+    "gapX": 50,
+    "gapY": 50
+  },
+  "elements": [
+    {"id": "input", "label": "Input", "type": "input", "row": 0, "col": 2, "detail": "B,C,H,W"},
+    {"id": "encoder", "label": "Encoder", "type": "processing", "row": 2, "col": 1, "colspan": 3, "detail": "Feature Extraction"},
+    {"id": "core_module", "label": "Core Module", "type": "innovation", "row": 4, "col": 1, "colspan": 3, "detail": "Novel Contribution"},
+    {"id": "decoder", "label": "Decoder", "type": "processing", "row": 6, "col": 1, "colspan": 3, "detail": "Reconstruction"},
+    {"id": "output", "label": "Output", "type": "output", "row": 8, "col": 2, "detail": "B,C,H,W"}
+  ],
+  "connections": [
+    {"source": "input", "target": "encoder", "type": "solid"},
+    {"source": "encoder", "target": "core_module", "type": "solid"},
+    {"source": "core_module", "target": "decoder", "type": "solid"},
+    {"source": "decoder", "target": "output", "type": "solid"},
+    {"source": "encoder", "target": "decoder", "type": "dashed", "label": "Skip"}
+  ],
+  "groups": []
+}

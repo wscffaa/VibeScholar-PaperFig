@@ -1,0 +1,31 @@
+{
+  "templateId": "flowchart-algorithm",
+  "description": "算法流程图模板（含判断分支，自上而下）",
+  "grid": {"cols": 5, "rows": 9},
+  "defaults": {
+    "direction": "top-to-bottom",
+    "cellWidth": 180,
+    "cellHeight": 80,
+    "gapX": 50,
+    "gapY": 60
+  },
+  "elements": [
+    {"id": "start", "label": "Start", "type": "start_end", "row": 0, "col": 2},
+    {"id": "step1", "label": "Step 1: Initialize", "type": "processing", "row": 1, "col": 2},
+    {"id": "step2", "label": "Step 2: Process", "type": "processing", "row": 2, "col": 2},
+    {"id": "decision", "label": "Converged?", "type": "decision", "row": 3, "col": 2},
+    {"id": "branch_yes", "label": "Finalize", "type": "processing", "row": 4, "col": 3},
+    {"id": "branch_no", "label": "Update Params", "type": "innovation", "row": 4, "col": 1},
+    {"id": "end", "label": "End", "type": "start_end", "row": 5, "col": 3}
+  ],
+  "connections": [
+    {"source": "start", "target": "step1", "type": "solid"},
+    {"source": "step1", "target": "step2", "type": "solid"},
+    {"source": "step2", "target": "decision", "type": "solid"},
+    {"source": "decision", "target": "branch_yes", "type": "solid", "label": "Yes"},
+    {"source": "decision", "target": "branch_no", "type": "solid", "label": "No"},
+    {"source": "branch_no", "target": "step2", "type": "dashed", "label": "Loop"},
+    {"source": "branch_yes", "target": "end", "type": "solid"}
+  ],
+  "groups": []
+}

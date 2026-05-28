@@ -1,0 +1,30 @@
+{
+  "templateId": "dataflow-pipeline",
+  "description": "数据流管道模板（左→右，适合前向传播路径）",
+  "grid": {"cols": 7, "rows": 3},
+  "defaults": {
+    "direction": "left-to-right",
+    "cellWidth": 160,
+    "cellHeight": 80,
+    "gapX": 60,
+    "gapY": 40
+  },
+  "elements": [
+    {"id": "source", "label": "Data Source", "type": "input", "row": 1, "col": 0},
+    {"id": "preprocess", "label": "Preprocess", "type": "processing", "row": 1, "col": 1},
+    {"id": "feature_ext", "label": "Feature Extraction", "type": "processing", "row": 1, "col": 2},
+    {"id": "transform", "label": "Transform", "type": "innovation", "row": 1, "col": 3},
+    {"id": "fusion", "label": "Fusion", "type": "innovation", "row": 1, "col": 4},
+    {"id": "reconstruct", "label": "Reconstruct", "type": "processing", "row": 1, "col": 5},
+    {"id": "output", "label": "Output", "type": "output", "row": 1, "col": 6}
+  ],
+  "connections": [
+    {"source": "source", "target": "preprocess", "type": "solid"},
+    {"source": "preprocess", "target": "feature_ext", "type": "solid"},
+    {"source": "feature_ext", "target": "transform", "type": "solid"},
+    {"source": "transform", "target": "fusion", "type": "solid"},
+    {"source": "fusion", "target": "reconstruct", "type": "solid"},
+    {"source": "reconstruct", "target": "output", "type": "solid"}
+  ],
+  "groups": []
+}

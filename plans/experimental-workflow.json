@@ -1,0 +1,35 @@
+{
+  "templateId": "experimental-workflow",
+  "description": "实验流程模板（训练→评估→分析，含数据集节点）",
+  "grid": {"cols": 5, "rows": 9},
+  "defaults": {
+    "direction": "top-to-bottom",
+    "cellWidth": 180,
+    "cellHeight": 80,
+    "gapX": 50,
+    "gapY": 50
+  },
+  "elements": [
+    {"id": "dataset", "label": "Training Dataset", "type": "datastore", "row": 0, "col": 2},
+    {"id": "train", "label": "Training Phase", "type": "processing", "row": 1, "col": 2, "detail": "Epochs, LR Schedule"},
+    {"id": "checkpoint", "label": "Best Checkpoint", "type": "baseline", "row": 2, "col": 2},
+    {"id": "test_data", "label": "Test Dataset", "type": "datastore", "row": 3, "col": 0},
+    {"id": "inference", "label": "Inference", "type": "processing", "row": 3, "col": 2},
+    {"id": "metrics", "label": "Compute Metrics", "type": "innovation", "row": 4, "col": 2, "detail": "PSNR/SSIM/LPIPS"},
+    {"id": "quant", "label": "Quantitative Results", "type": "output", "row": 5, "col": 1},
+    {"id": "qual", "label": "Qualitative Results", "type": "output", "row": 5, "col": 3},
+    {"id": "analysis", "label": "Analysis & Ablation", "type": "innovation", "row": 7, "col": 2}
+  ],
+  "connections": [
+    {"source": "dataset", "target": "train", "type": "solid"},
+    {"source": "train", "target": "checkpoint", "type": "solid"},
+    {"source": "checkpoint", "target": "inference", "type": "solid"},
+    {"source": "test_data", "target": "inference", "type": "solid"},
+    {"source": "inference", "target": "metrics", "type": "solid"},
+    {"source": "metrics", "target": "quant", "type": "solid"},
+    {"source": "metrics", "target": "qual", "type": "solid"},
+    {"source": "quant", "target": "analysis", "type": "solid"},
+    {"source": "qual", "target": "analysis", "type": "solid"}
+  ],
+  "groups": []
+}
